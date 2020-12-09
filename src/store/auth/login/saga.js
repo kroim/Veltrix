@@ -5,7 +5,7 @@ import { LOGIN_USER, LOGOUT_USER } from './actionTypes';
 import { loginSuccess, logoutUserSuccess, apiError } from './actions';
 
 //AUTH related methods
-import { initBackendAPI } from '../../../helpers/authUtils';
+import { initBackendAPI } from '../../../helpers/backend';
 
 const backendAPI = initBackendAPI();
 

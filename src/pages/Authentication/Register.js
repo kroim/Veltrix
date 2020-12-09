@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Row, Card } from "reactstrap";
 import { Link } from "react-router-dom";
+import { getBackendAPI } from "../../helpers/backend";
 
 // import images
 import bg from "../../assets/images/bg.jpg";
@@ -10,6 +11,28 @@ class Register extends Component {
   constructor(props) {
     super(props);
     this.state = {};
+  }
+
+  onRegister = async(e) => {
+    const { history } = this.props;
+    e.preventDefault();
+    let useremail = document.getElementById('useremail').value;
+    let username = document.getElementById('username').value;
+    let userpassword = document.getElementById('userpassword').value;
+    if(useremail.trim().length && this.validateEmail(useremail) && username.trim().length && userpassword.trim().length){
+      try{
+        await getBackendAPI().registerUser(useremail, username, userpassword);
+        history.push('/login');
+      } catch(e){
+        console.log('error', e);
+      }
+    }
+  }
+
+  
+  validateEmail = (email) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
   }
 
   render() {
@@ -77,7 +100,7 @@ class Register extends Component {
                         <div className="col-12 text-right">
                           <button
                             className="btn btn-primary w-md waves-effect waves-light"
-                            type="submit"
+                            onClick={this.onRegister}
                           >
                             Register
                           </button>

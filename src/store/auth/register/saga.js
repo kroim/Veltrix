@@ -5,7 +5,7 @@ import { REGISTER_USER } from './actionTypes';
 import { registerUserSuccessful, registerUserFailed } from './actions';
 
 //AUTH related methods
-import { initBackendAPI } from '../../../helpers/authUtils';
+import { initBackendAPI } from '../../../helpers/backend';
 
 const backendAPI = initBackendAPI();
 

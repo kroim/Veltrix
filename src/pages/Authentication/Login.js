@@ -22,13 +22,14 @@ class Login extends Component {
     this.state = {};
   }
 
-  onLogin = () => {
+  onLogin = (e) => {
     const { loginUser, history } = this.props;
     let username = document.getElementById('username').value;
     let userpassword = document.getElementById('userpassword').value;
     if(username.trim().length && userpassword.trim().length){
       loginUser({name: username, password: userpassword}, history);
     }
+    e.preventDefault();
   }
 
   render() {
@@ -103,7 +104,6 @@ class Login extends Component {
                         <Col sm="6" className="text-right">
                           <button
                             className="btn btn-primary w-md waves-effect waves-light"
-                            type="submit"
                             onClick={this.onLogin}
                           >
                             Log In

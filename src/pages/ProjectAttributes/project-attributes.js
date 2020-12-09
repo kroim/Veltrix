@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import SettingMenu from "../Shared/SettingMenu";
 import { Row, Col, Label, Input, Button } from "reactstrap";
 import { Link } from "react-router-dom";
+import { getBackendAPI } from "../../helpers/backend";
 
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
@@ -25,43 +26,74 @@ class ProjectAttributesPage extends Component {
         { name: 'Client', handle: 'client' }
       ],
     };
+    this.init();
   }
 
   componentDidMount() {}
 
-  addPackageTag=() => {
+  init = async() => {
+    let attributes = await getBackendAPI().allProjectAttributes();
+    console.log('attributes', attributes);
+    let workPackages = attributes.filter(item => item.attribute_name === 'Work Package');
+    let locationTags = attributes.filter(item => item.attribute_name === 'Location');
+    let disciplineTags = attributes.filter(item => item.attribute_name === 'Discipline');
+    this.setState({workPackages: workPackages, locationTags: locationTags, disciplineTags: disciplineTags});
+  }
+
+  addPackageTag = async() => {
     const { workPackages } = this.state;
     let newWorkPackages = workPackages;
-    let package_name_text = document.getElementById('package_name').value;
-    let package_handle_text = document.getElementById('package_handle').value;
+    let package_name_text = document.getElementById('package_name').value.trim();
+    let package_handle_text = document.getElementById('package_handle').value.trim();
 
-    if(package_name_text.trim().length && package_handle_text.trim().length){
-      newWorkPackages.push({name: package_name_text, handle: package_handle_text});
-      this.setState({addingPackageTag: false, workPackages: newWorkPackages});
+    if(package_name_text.length && package_handle_text.length){
+      try{
+        let attribute = await getBackendAPI().addProjectAttribute('Work Package', package_name_text, package_handle_text);
+        if(attribute){
+          newWorkPackages.push(attribute);
+          this.setState({addingPackageTag: false, workPackages: newWorkPackages});
+        }
+      } catch(e){
+
+      }
     }
   }
 
-  addLocationTag=() => {
+  addLocationTag = async() => {
     const { locationTags } = this.state;
     let newLocationTags = locationTags;
     let location_name_text = document.getElementById('location_name').value;
     let location_handle_text = document.getElementById('location_handle').value;
 
     if(location_name_text.trim().length && location_handle_text.trim().length){
-      newLocationTags.push({name: location_name_text, handle: location_handle_text});
-      this.setState({addingLocationTag: false, locationTags: newLocationTags});
+      try{
+        let attribute = await getBackendAPI().addProjectAttribute('Location', location_name_text, location_handle_text);
+        if(attribute){
+          newLocationTags.push(attribute);
+          this.setState({addingLocationTag: false, locationTags: newLocationTags});
+        }
+      } catch(e){
+
+      }
     }
   }
 
-  addDisciplineTag=() => {
+  addDisciplineTag = async() => {
     const { disciplineTags } = this.state;
     let newDisciplineTags = disciplineTags;
     let discipline_name_text = document.getElementById('discipline_name').value;
     let discipline_handle_text = document.getElementById('discipline_handle').value;
 
     if(discipline_name_text.trim().length && discipline_handle_text.trim().length){
-      newDisciplineTags.push({name: discipline_name_text, handle: discipline_handle_text});
-      this.setState({addingDisciplineTag: false, disciplineTags: newDisciplineTags});
+      try{
+        let attribute = await getBackendAPI().addProjectAttribute('Discipline', discipline_name_text, discipline_handle_text);
+        if(attribute){
+          newDisciplineTags.push(attribute);
+          this.setState({addingDisciplineTag: false, disciplineTags: newDisciplineTags});
+        }
+      } catch(e){
+
+      }
     }
   }
 
@@ -113,7 +145,7 @@ class ProjectAttributesPage extends Component {
                               workPackages.map((item, index) => (
                                 <tr key={index}>
                                   <th scope="row">{index + 1}</th>
-                                  <td>{item.name}</td>
+                                  <td>{item.tag_name}</td>
                                   <td>{item.handle}</td>
                                 </tr>
                               ))
@@ -133,7 +165,7 @@ class ProjectAttributesPage extends Component {
                             </Button>
                           </div>
                         :
-                        <div class="mt-4">
+                        <div className="mt-4">
                           <Row  className="align-items-end">
                             <Col lg="6" className="form-group">
                               <Label for="name">Work Package Name</Label>
@@ -155,7 +187,7 @@ class ProjectAttributesPage extends Component {
                                 />
                             </Col>
                           </Row>
-                          <div class="float-right d-flex">
+                          <div className="float-right d-flex">
                             <Button
                               onClick={this.addPackageTag}
                               color="primary"
@@ -203,7 +235,7 @@ class ProjectAttributesPage extends Component {
                               disciplineTags.map((item, index) => (
                                 <tr key={index}>
                                   <th scope="row">{index + 1}</th>
-                                  <td>{item.name}</td>
+                                  <td>{item.tag_name}</td>
                                   <td>{item.handle}</td>
                                 </tr>
                               ))
@@ -245,7 +277,7 @@ class ProjectAttributesPage extends Component {
                                 />
                             </Col>
                           </Row>
-                            <div class="float-right d-flex">
+                            <div className="float-right d-flex">
                               <Button
                                 onClick={this.addDisciplineTag}
                                 color="primary"
@@ -295,7 +327,7 @@ class ProjectAttributesPage extends Component {
                           locationTags.map((item, index) => (
                             <tr key={index}>
                               <th scope="row">{index + 1}</th>
-                              <td>{item.name}</td>
+                              <td>{item.tag_name}</td>
                               <td>{item.handle}</td>
                             </tr>
                           ))
@@ -315,7 +347,7 @@ class ProjectAttributesPage extends Component {
                         </Button>
                       </div>
                     :
-                    <div class="mt-4">
+                    <div className="mt-4">
                       <Row  className="align-items-end">
                         <Col lg="6" className="form-group">
                           <Label for="name">Location Tag</Label>
@@ -337,7 +369,7 @@ class ProjectAttributesPage extends Component {
                             />
                         </Col>
                       </Row>
-                      <div class="float-right d-flex">
+                      <div className="float-right d-flex">
                         <Button
                           onClick={this.addLocationTag}
                           color="primary"

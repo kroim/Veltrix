@@ -3,6 +3,7 @@ const { graphqlHTTP } = require('express-graphql');
 const schema = require('./schema/schema');
 const Config = require('./config');
 const verifyTokenMiddleware = require('./middleware/authJwt');
+const path = require('path');
 
 const app = express();
 
@@ -34,6 +35,13 @@ app.use('/api', graphqlHTTP({
     //which provides an interface to make GraphQl queries
     graphiql:true
 }));
+
+app.use(express.static(path.join(__dirname, '../build')));
+
+app.get('/*', (req, res)=> {
+    var buildFile = require('path').join(__dirname,'../build/index.html'); 
+    res.sendFile(buildFile);
+});
 
 app.listen(4000, () => {
     console.log('Listening on port 4000');

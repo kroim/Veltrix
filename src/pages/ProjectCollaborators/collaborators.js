@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import SettingMenu from "../Shared/SettingMenu";
 import { Row, Col, Card, CardBody, Input, Label, Button } from "reactstrap";
 import { Link } from "react-router-dom";
+import { getBackendAPI } from "../../helpers/backend";
 
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
@@ -10,34 +11,36 @@ class CollaboratorsPage extends Component {
     super(props);
     this.state = {
       addingTeam: false,
-      teams: [
-        { name: 'Construction', abrv: 'Con', handle: 'construction', planning: 'Daily' },
-        { name: 'Design', abrv: 'Des', handle: 'design', planning: 'Weekly' },
-        { name: 'Engineering', abrv: 'Eng', handle: 'engineering', planning: 'Weekly' }
-      ],
+      teams: [],
       addingMember: false,
-      teamMembers: [
-        { first_name: 'Mark', last_name: 'Otto', abrv: 'M01', handle: 'motto', email: 'test@email.com' },
-        { first_name: 'Jocob', last_name: 'Thorntom', abrv: 'JT1', handle: 'motto', email: 'test@email.com' },
-        { first_name: 'Larry', last_name: 'Bird', abrv: 'LB1', handle: 'motto', email: 'test@email.com' },
-      ],
+      teamMembers: [],
       currentTeam: 0,
-      associations: [
-        { team_name: 'Construction', member_name: 'Mark Otto', role: 'Administrator' },
-        { team_name: 'Construction', member_name: 'Mark Otto', role: 'Member' },
-        { team_name: 'Construction', member_name: 'Mark Otto', role: 'Member' }
-      ]
+      addingAssocation: false,
+      associations: [],
+      roles: ['Administrator', 'Designer']
     };
+    this.init();
+  }
+  
+  componentDidMount() {
   }
 
-  componentDidMount() {}
+  init = async() => {
+    let teams = await getBackendAPI().getTeams();
+    console.log('teams', teams);
+    let members = await getBackendAPI().getMembers();
+    console.log('members', members);
+    let associations = await getBackendAPI().getAssociations();
+    console.log('associations', associations);
+    this.setState({teams: teams, teamMembers: members, associations: associations});
+  }
 
   validateEmail(email) {
       const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(String(email).toLowerCase());
   }
 
-  addTeam=() => {
+  addTeam = async() => {
     const { teams } = this.state;
     let newTeams = teams;
     let team_name_text = document.getElementById('team_name').value;
@@ -46,17 +49,17 @@ class CollaboratorsPage extends Component {
     let team_planning_text = document.getElementById('team_planning').value;
 
     if(team_name_text.trim().length && team_abrv_text.trim().length && team_handle_text.trim().length && team_planning_text.trim().length){
-      newTeams.push({
-        name: team_name_text, 
-        abrv: team_abrv_text,
-        handle: team_handle_text,
-        planning: team_planning_text
-      });
-      this.setState({addingTeam: false, teams: newTeams});
+      try{
+        let team = await getBackendAPI().addTeam(team_name_text, team_abrv_text, team_handle_text, team_planning_text);
+        newTeams.push(team);
+        this.setState({addingTeam: false, teams: newTeams});
+      } catch(e){
+
+      }
     }
   }
 
-  addTeamMember=() => {
+  addTeamMember = async() => {
     const { teamMembers } = this.state;
     let newTeamMembers = teamMembers;
     let member_first_name_text = document.getElementById('member_first_name').value;
@@ -66,19 +69,38 @@ class CollaboratorsPage extends Component {
     let member_email_text = document.getElementById('member_email').value;
 
     if(member_first_name_text.trim().length && member_last_name_text.trim().length && member_abrv_text.trim().length && member_handle_text.trim().length && member_email_text.trim().length  && this.validateEmail(member_email_text.trim())){
-      newTeamMembers.push({
-        first_name: member_first_name_text, 
-        last_name: member_last_name_text, 
-        abrv: member_abrv_text,
-        handle: member_handle_text,
-        email: member_email_text
-      });
-      this.setState({addingMember: false, teamMembers: newTeamMembers});
+      try{
+        let member = await getBackendAPI().addMember(member_first_name_text, member_last_name_text, member_abrv_text, member_handle_text, member_email_text);
+        newTeamMembers.push(member);
+        this.setState({addingMember: false, teamMembers: newTeamMembers});
+      } catch(e){
+
+      }
     }
   }
 
+  
+  addAssociation = async() => {
+    const { associations } = this.state;
+    let newAssociations = associations;
+    let team_id_text = document.getElementById('team_id_select').value;
+    let member_id_text = document.getElementById('member_id_select').value;
+    let role_text = document.getElementById('role_text_select').value;
+
+    if(team_id_text.trim().length && member_id_text.trim().length && role_text.trim().length){
+      try{
+        let association = await getBackendAPI().addAssociation(team_id_text, member_id_text, role_text);
+        newAssociations.push(association);
+        this.setState({addingAssocation: false, associations: newAssociations});
+      } catch(e){
+
+      }
+    }
+  }
+
+
   render() {
-    const { addingTeam, teams, addingMember, teamMembers, associations } = this.state;
+    const { addingTeam, teams, addingMember, teamMembers, addingAssocation, associations, roles } = this.state;
     return (
       <React.Fragment>
         <div className="container-fluid">
@@ -190,7 +212,7 @@ class CollaboratorsPage extends Component {
                             />
                         </Col>
                       </Row>
-                      <div class="float-right d-flex">
+                      <div className="float-right d-flex">
                           <Button
                             onClick={this.addTeam}
                             color="primary"
@@ -312,7 +334,7 @@ class CollaboratorsPage extends Component {
                               />
                           </Col>
                         </Row>
-                        <div class="float-right d-flex">
+                        <div className="float-right d-flex">
                           <Button
                             onClick={this.addTeamMember}
                             color="primary"
@@ -363,8 +385,8 @@ class CollaboratorsPage extends Component {
                           associations.map((item, index) => (
                             <tr key={index}>
                               <th scope="row">{index + 1}</th>
-                              <td>{item.team_name}</td>
-                              <td>{item.member_name}</td>
+                              <td>{item.team.name}</td>
+                              <td>{item.member.first_name + " " + item.member.last_name}</td>
                               <td>{item.role}</td>
                             </tr>
                           ))
@@ -372,6 +394,65 @@ class CollaboratorsPage extends Component {
                       </tbody>
                     </table>
                   </div>
+                  {!addingAssocation?
+                          <div className="float-right  mt-4">
+                            <Button
+                                color="primary"
+                                className="btn btn-primary waves-effect waves-light"
+                                onClick={()=>this.setState({addingAssocation: true})}
+                              >
+                              Add +
+                            </Button>
+                          </div>
+                        :
+                        <div className="mt-4">
+                        <Row  className="align-items-end">
+                          <Col lg="4" className="form-group">
+                            <Label for="name">Team</Label>
+                            <select id="team_id_select" name="team_id_select" className="form-control">
+                              { teams.map(item => (
+                                <option key={item._id} value={item._id}>{item.name}</option>
+                              ))}
+                            </select>
+                          </Col>
+                          <Col lg="4" className="form-group">
+                            <Label for="name">Member</Label>
+                            <select id="member_id_select" name="member_id_select" className="form-control">
+                            { teamMembers.map(item => (
+                                <option key={item._id} value={item._id}>{item.first_name + " " + item.last_name}</option>
+                              ))}
+                            </select>
+                          </Col>
+                          <Col lg="4" className="form-group">
+                            <Label for="handle">Role</Label>
+                            <select id="role_text_select" name="role_text_select" className="form-control">
+                              { roles.map((item) => (
+                                <option key={item} value={item}>{item}</option>
+                              ))}
+                            </select>
+                          </Col>
+                        </Row>
+                        <div className="float-right d-flex">
+                          <Button
+                            onClick={this.addAssociation}
+                            color="primary"
+                            className="mx-2"
+                            style={{ width: "100%" }}
+                          >
+                            {" "}
+                            AddMember{" "}
+                          </Button>
+                          <Button
+                            onClick={()=>this.setState({addingAssocation: false})}
+                            color="secondary"
+                            style={{ width: "100%" }}
+                          >
+                            {" "}
+                            Close{" "}
+                          </Button>
+                      </div>
+                      </div>
+                      }
                 </div>
               </div>
             </Col>

@@ -5,7 +5,7 @@ import { FORGET_PASSWORD } from "./actionTypes";
 import { userForgetPasswordSuccess, userForgetPasswordError } from "./actions";
 
 //AUTH related methods
-import { initBackendAPI } from "../../../helpers/authUtils";
+import { initBackendAPI } from "../../../helpers/backend";
 
 const backendAPI = initBackendAPI();
 

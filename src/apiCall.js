@@ -8,12 +8,13 @@ export const postCall = (data, successCallback, failCallback = null) => {
         headers['x-access-token'] = token;
     }
     console.log('postCall ', data, headers);
-    axios({
-        url: `${API_BASE_URL}`,
-        mothod: 'post',
-        data: data,
-        headers: headers
-    }).then((result) => {
+    axios.post(
+        `${API_BASE_URL}`,
+        data,
+        {
+            headers: headers
+        }
+    ).then((result) => {
         console.log('postCall Success :', result.data.data);
         successCallback(result.data.data);
     }).catch((error) => {
@@ -32,7 +33,7 @@ export const getCall = (data, successCallback, failCallback = null) => {
     }
     axios({
         url: `${API_BASE_URL}?query=${data}`,
-        mothod: 'get',
+        mothod: 'GET',
         headers: headers
     }).then((result) => {
         console.log('getCall Success :', result.data.data);

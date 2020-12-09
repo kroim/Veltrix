@@ -14,8 +14,8 @@ import NonAuthLayout from "./components/NonAuthLayout";
 // Import scss
 import "./assets/scss/theme.scss";
 
-// Import Firebase Configuration file
-import { initBackendAPI } from "./helpers/authUtils";
+// Import Configuration file
+import { initBackendAPI } from "./helpers/backend";
 
 initBackendAPI();
 

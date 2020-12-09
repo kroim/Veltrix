@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 
 //AUTH related methods
-import { initBackendAPI } from "../helpers/authUtils";
+import { initBackendAPI } from "../helpers/backend";
 
 const AppRoute = ({
   component: Component,
