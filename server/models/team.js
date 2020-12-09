@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const teamSchema = new Schema({
     name: String,
     abrv: String,
+    handle: String,
     planning: String
 }, { collection: 'teams' });
 
