@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { withRouter, Link } from 'react-router-dom';
+import SweetAlert from "react-bootstrap-sweetalert";
 
 // users
 import user4 from '../assets/images/users/user-4.jpg';
@@ -12,6 +13,7 @@ class ProfileMenu extends Component {
         super(props);
         this.state = {
             menu: false,
+            openLogoutDlg: false,
         };
         this.toggle = this.toggle.bind(this);
     }
@@ -22,9 +24,16 @@ class ProfileMenu extends Component {
         }));
     }
 
+    onLogout = () => {
+        const { history } = this.props;
+        this.setState({openLogoutDlg: false});
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('authUser');
+        history.push('/login');
+    }
 
     render() {
-
+        const { openLogoutDlg } = this.state;
         return (
             <React.Fragment>
                 <Dropdown isOpen={this.state.menu} toggle={this.toggle} className="d-inline-block" >
@@ -37,13 +46,27 @@ class ProfileMenu extends Component {
                         <DropdownItem tag="a" href="#"><span className="badge badge-success float-right">11</span><i className="mdi mdi-settings font-size-17 align-middle mr-1"></i>Settings</DropdownItem>
                         <DropdownItem tag="a" href="#"><i className="mdi mdi-lock-open-outline font-size-17 align-middle mr-1"></i>Lock screen</DropdownItem>
                         <div className="dropdown-divider"></div>
-                        <Link
-                            to='/logout'
+                        <div
+                            onClick={(e) => this.setState({openLogoutDlg: true})}
                             className="dropdown-item">
                             <i className="mdi mdi-logout font-size-17 align-middle mr-1"></i>
                             <span>Logout</span>
-                        </Link>
+                        </div>
                     </DropdownMenu>
+                    { openLogoutDlg ? 
+                        <SweetAlert
+                      title="Are you sure you want to log out?"
+                      warning
+                      showCancel
+                      confirmBtnText="Yes"
+                      confirmBtnBsStyle="danger"
+                      cancelBtnBsStyle="success"
+                      onConfirm={this.onLogout}
+                      onCancel={() => this.setState({openLogoutDlg: false})}
+                    >
+                    </SweetAlert>
+                    : 
+                    null}
                 </Dropdown>
             </React.Fragment>
         );
