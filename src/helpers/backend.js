@@ -2,7 +2,7 @@ import { getCall, postCall } from "../apiCall";
 
 class BackendAPI {
   constructor() {
-      let token = sessionStorage.getItem("token");
+      let token = localStorage.getItem("token");
       console.log('session token', token);
       if(!token) return;
       getCall(
@@ -16,9 +16,9 @@ class BackendAPI {
         }`, 
         (res) => {
           if (res.me) {
-            sessionStorage.setItem("authUser", JSON.stringify(res.me));
+            localStorage.setItem("authUser", JSON.stringify(res.me));
           } else {
-            sessionStorage.removeItem("authUser");
+            localStorage.removeItem("authUser");
           }
         });
   }
@@ -102,15 +102,15 @@ class BackendAPI {
   };
 
   setLoggeedInUser = user => {
-    sessionStorage.setItem("authUser", JSON.stringify(user));
+    localStorage.setItem("authUser", JSON.stringify(user));
   };
 
   /**
    * Returns the authenticated user
    */
   getAuthenticatedUser = () => {
-    if (!sessionStorage.getItem("authUser")) return null;
-    return JSON.parse(sessionStorage.getItem("authUser"));
+    if (!localStorage.getItem("authUser")) return null;
+    return JSON.parse(localStorage.getItem("authUser"));
   };
 
   /**

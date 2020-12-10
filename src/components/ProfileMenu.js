@@ -27,8 +27,8 @@ class ProfileMenu extends Component {
     onLogout = () => {
         const { history } = this.props;
         this.setState({openLogoutDlg: false});
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('authUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('authUser');
         history.push('/login');
     }
 

@@ -14,7 +14,7 @@ function* loginUser({ payload: { user, history } }) {
         const response = yield call(backendAPI.loginUser, user.name, user.password);
         const { login } = response;
         if(login.token){
-            sessionStorage.setItem('token', login.token);
+            localStorage.setItem('token', login.token);
             yield call(backendAPI.setLoggeedInUser, login);
             yield put(loginSuccess(login));
             history.push('/dashboard');

@@ -3,7 +3,7 @@ const axios = require('axios');
 //const API_BASE_URL = 'http://localhost:4000/api'
 const API_BASE_URL = '/api'
 export const postCall = (data, successCallback, failCallback = null) => {
-    let token = sessionStorage.getItem('token');
+    let token = localStorage.getItem('token');
     let headers = { 'Content-Type': 'application/graphql' };
     if(token){
         headers['x-access-token'] = token;
@@ -27,7 +27,7 @@ export const postCall = (data, successCallback, failCallback = null) => {
 }
 
 export const getCall = (data, successCallback, failCallback = null) => {
-    let token = sessionStorage.getItem('token');
+    let token = localStorage.getItem('token');
     let headers = { 'Content-Type': 'application/graphql' };
     if(token){
         headers['x-access-token'] = token;
