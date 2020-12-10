@@ -21,6 +21,12 @@ const AppRoute = ({
             to={{ pathname: "/login", state: { from: props.location } }}
           />
         );
+      } else if(!isAuthProtected && backendAPI.getAuthenticatedUser()){
+        return (
+          <Redirect
+            to={{ pathname: "/dashboard", state: { from: props.location } }}
+          />
+        );
       }
 
       return (
