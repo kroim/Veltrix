@@ -1,4 +1,5 @@
 module.exports = {
+    server_base_url: 'http://localhost:4000'
     mongodb_host: 'localhost',
     mongodb_port: '27017',
     mongodb_database: 'veltrixdb',

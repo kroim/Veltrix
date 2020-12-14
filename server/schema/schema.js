@@ -353,8 +353,8 @@ const Mutation = new GraphQLObjectType({
                     from: Config.mailer_user,
                     to: args.email,
                     subject: "Veltrix Require Password",
-                    text: `Please Create Password in http://localhost:3000/create-password?id=${member_id}`,
-                    html: `<span>Please Create Password in <a href="http://localhost:3000/create-password?id=${member_id}">here</a></span>`
+                    text: `Please Create Password in ${Config.server_base_url}/create-password?id=${member_id}`,
+                    html: `<span>Please Create Password in <a href="${Config.server_base_url}/create-password?id=${member_id}">here</a></span>`
                 };
 
                 transporter.sendMail(data, function(err, info){
