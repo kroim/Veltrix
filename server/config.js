@@ -7,6 +7,6 @@ module.exports = {
     secret: "veltrix-secret-key",
     mailer_host: 'smtp.gmail.com',
     mailer_port: 587,
-    mailer_user: '',
-    mailer_pass: ''
+    mailer_user: 'sarkis19930919@gmail.com',
+    mailer_pass: 'w"gq(Ej6QVfB7.)$u'
 }
