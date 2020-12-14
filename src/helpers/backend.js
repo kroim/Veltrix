@@ -52,6 +52,33 @@ class BackendAPI {
   };
 
   /**
+   * Registers the user with Mail
+   */
+  registerUserByMail = (email, name, password, member_id) => {
+    return new Promise((resolve, reject) => {
+      postCall(`mutation{
+        registerFromMember(email:"${email}", name:"${name}", password: "${password}", member_id: "${member_id}"){
+            _id,
+            email,
+            name,
+            token
+        }
+    }`,
+      (res) => {
+            if(res.registerFromMember._id){
+              resolve(res.registerFromMember);
+            } else {
+              reject("Resiger Failed");
+            }
+          },
+          error => {
+            reject(this._handleError(error));
+          }
+      );
+    });
+  };
+
+  /**
    * Login user with given details
    */
   loginUser = (name, password) => {
@@ -246,6 +273,34 @@ class BackendAPI {
     });
   }
 
+
+    /**
+   * Return Member
+   */
+  getMember = (id) => {
+    return new Promise((resolve, reject) => {
+      getCall(`{
+        member(id:"${id}"){
+          _id,
+          first_name,
+          last_name,
+          abrv,
+          handle,
+          email,
+          is_registered
+         }
+        }`,(res) => {
+            if(res.member){
+              resolve(res.member);
+            }
+          },
+          error => {
+            reject(this._handleError(error));
+          }
+        );
+    });
+  }
+
   /**
    * Add Member
    */
@@ -264,7 +319,14 @@ class BackendAPI {
       }`,
       (res) => {
             if(res.add_member._id){
-              resolve(res.add_member);
+              let newMember = res.add_member;
+              postCall(`mutation{
+                  send_mail(member_id:"${newMember._id}", email:"${newMember.email}"){
+                     result
+                  }
+                }`,
+                (res) => { resolve(newMember); },
+                (err) => { reject("Resiger Failed"); });
             } else {
               reject("Resiger Failed");
             }

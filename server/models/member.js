@@ -6,7 +6,8 @@ const memberSchema = new Schema({
     last_name: String,
     abrv: String,
     handle: String,
-    email: String
+    email: String,
+    is_registered: Boolean
 }, { collection: 'members' });
 
 module.exports = mongoose.model('Member', memberSchema);

@@ -6,28 +6,28 @@ const Config = require('../config');
 const { User, Team, Member, Association, ProjectAttribute } = require('../models/index');
 
 const { GraphQLObjectType, GraphQLString, 
-       GraphQLID, GraphQLNonNull, GraphQLSchema, GraphQLList } = graphql;
+       GraphQLID, GraphQLNonNull, GraphQLSchema, GraphQLList, GraphQLBoolean } = graphql;
 
 // Setting Mailer
-// var transport = {
-//     host: Config.mailer_host,
-//     port: Config.mailer_port,
-//     secure: false,
-//     auth: {
-//         user: Config.mailer_user,
-//         pass: Config.mailer_pass
-//     }
-// }
+var transport = {
+    host: Config.mailer_host,
+    port: Config.mailer_port,
+    secure: true,
+    auth: {
+        user: Config.mailer_user,
+        pass: Config.mailer_pass
+    }
+}
 
-// var transporter = nodemailer.createTransport(transport)
+var transporter = nodemailer.createTransport(transport)
 
-// transporter.verify((error, success) => {
-// if (error) {
-//     console.log(error);
-// } else {
-//     console.log('Setting Mailer Success!');
-// }
-// });
+transporter.verify((error, success) => {
+if (error) {
+    console.log(error);
+} else {
+    console.log('Setting Mailer Success!');
+}
+});
 
 const UserType = new GraphQLObjectType({
     name: 'User',
@@ -69,7 +69,8 @@ const MemberType = new GraphQLObjectType({
         last_name: { type: GraphQLString }, 
         abrv: { type: GraphQLString },
         handle: { type: GraphQLString },
-        email: { type: GraphQLString }
+        email: { type: GraphQLString },
+        is_registered: { type: GraphQLBoolean }
     })
 });
 
@@ -92,6 +93,13 @@ const AssociationType = new GraphQLObjectType({
                 return Member.findById(parent.member_id);
             }
         }
+    })
+});
+
+const SendMailType = new GraphQLObjectType({
+    name: 'SendMail',
+    fields: () => ({
+        result: { type: GraphQLString },
     })
 });
 
@@ -184,6 +192,13 @@ const RootQuery = new GraphQLObjectType({
                 return Member.find({});
             }
         },
+        member: {
+            type: MemberType,
+            args: { id: { type: GraphQLString }},
+            async resolve(parent, args){
+                return Member.findById(args.id);
+            }
+        },
         associations: {
             type: new GraphQLList(AssociationType),
             async resolve(parent, args){
@@ -219,6 +234,38 @@ const Mutation = new GraphQLObjectType({
                     token: token,
                     createdAt: now,
                     updatedAt: now
+                });
+                return user.save();
+            }
+        },
+        registerFromMember: {
+            type: UserType,
+            args: {
+                email: { type: new GraphQLNonNull(GraphQLString) },
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                password: { type: new GraphQLNonNull(GraphQLString) },           
+                member_id: { type: new GraphQLNonNull(GraphQLString) }          
+            },
+            resolve(parent, args){
+
+                const token = jwt.sign({ name: args.name }, Config.secret, {
+                    expiresIn: 86400 // 24 hours
+                  });
+                const now = Date.now();
+
+                const salt = bcrypt.genSaltSync(10);
+
+                let user = new User({
+                    email: args.email,
+                    name: args.name,
+                    password: bcrypt.hashSync(args.password, salt),
+                    token: token,
+                    createdAt: now,
+                    updatedAt: now
+                });
+                Member.findById(args.member_id, function(err, doc){
+                    doc.is_registered = true;
+                    doc.save();
                 });
                 return user.save();
             }
@@ -272,7 +319,8 @@ const Mutation = new GraphQLObjectType({
                     last_name: args.last_name,
                     abrv: args.abrv,
                     handle: args.handle,
-                    email: args.email
+                    email: args.email,
+                    is_registered: false,
                 })
                 return member.save();
             }
@@ -291,6 +339,33 @@ const Mutation = new GraphQLObjectType({
                     role: args.role
                 })
                 return association.save();
+            }
+        },
+        send_mail:{
+            type: SendMailType,
+            args: {
+                member_id: { type: GraphQLString },
+                email: { type: GraphQLString },
+            },
+            resolve(parent, args){
+                let member_id = args.member_id;
+                let data = {
+                    from: Config.mailer_user,
+                    to: args.email,
+                    subject: "Veltrix Require Password",
+                    text: `Please Create Password in http://localhost:3000/create-password?id=${member_id}`,
+                    html: `<span>Please Create Password in <a href="http://localhost:3000/create-password?id=${member_id}">here</a></span>`
+                };
+
+                transporter.sendMail(data, function(err, info){
+                    if(err){
+                        console.log('Send Mail Failed: ', err);
+                    } else {
+                        console.log('Sned Mail Success: ', info);
+                    }
+                });
+
+                return { result: "success"};
             }
         }
     }

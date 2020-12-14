@@ -91,6 +91,9 @@ class ProjectAttributesPage extends Component {
     let discipline_handle_text = document.getElementById('discipline_handle').value;
 
     if(discipline_name_text.trim().length && discipline_handle_text.trim().length){
+      if(disciplineTags.find(disciplineTag => disciplineTag.tag_name === discipline_name_text)){
+        return;
+      }
       try{
         let attribute = await getBackendAPI().addProjectAttribute('Discipline', discipline_name_text, discipline_handle_text);
         if(attribute){
@@ -265,7 +268,7 @@ class ProjectAttributesPage extends Component {
                         <div>
                           <Row  className="align-items-end">
                             <Col lg="6" className="form-group">
-                              <Label for="name">Discipline Name</Label>
+                              <Label for="name">Discipline Tag</Label>
                               <Input
                                 ref={(r) => this.discipline_name=r}
                                 type="text"
