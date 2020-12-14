@@ -1,12 +1,33 @@
 const graphql = require('graphql');
 const jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
+const nodemailer  = require("nodemailer");
 const Config = require('../config');
 const { User, Team, Member, Association, ProjectAttribute } = require('../models/index');
 
 const { GraphQLObjectType, GraphQLString, 
        GraphQLID, GraphQLNonNull, GraphQLSchema, GraphQLList } = graphql;
 
+// Setting Mailer
+// var transport = {
+//     host: Config.mailer_host,
+//     port: Config.mailer_port,
+//     secure: false,
+//     auth: {
+//         user: Config.mailer_user,
+//         pass: Config.mailer_pass
+//     }
+// }
+
+// var transporter = nodemailer.createTransport(transport)
+
+// transporter.verify((error, success) => {
+// if (error) {
+//     console.log(error);
+// } else {
+//     console.log('Setting Mailer Success!');
+// }
+// });
 
 const UserType = new GraphQLObjectType({
     name: 'User',
@@ -93,8 +114,29 @@ const RootQuery = new GraphQLObjectType({
         me: {
             type: UserType,
             args: { token: { type: GraphQLString }},
-            resolve(parent, args){
-                return User.findOne({ token: args.token });
+            async resolve(parent, args){
+                let user = await User.findOne({ token: args.token });
+                if(user){
+                    let token = jwt.sign({ name: user.name }, Config.secret, {
+                        expiresIn: 86400 // 24 hours
+                      });
+                    let now = Date.now();
+                    user = {
+                        _id: user._id,
+                        email: user.email,
+                        name: user.name, 
+                        token: token, 
+                        createdAt: user.createdAt,
+                        updatedAt: now
+                    };
+                    User.findById(user._id, function(err, doc){
+                        doc.token = token;
+                        doc.updatedAt = now;
+                        doc.save();
+                    });
+                    return user;
+                }
+                return null;
             }
         },
         login: {

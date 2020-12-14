@@ -5,6 +5,10 @@ module.exports = {
     mongodb_database: 'veltrixdb',
     mongodb_user_name : '',
     mongodb_user_passwd : '',
-    secret: "veltrix-secret-key"
+    secret: "veltrix-secret-key",
+    mailer_host: 'smtp.gmail.com',
+    mailer_port: 587,
+    mailer_user: '',
+    mailer_pass: ''
 }
 

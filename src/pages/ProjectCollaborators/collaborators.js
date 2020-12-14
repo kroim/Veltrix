@@ -17,7 +17,8 @@ class CollaboratorsPage extends Component {
       currentTeam: 0,
       addingAssocation: false,
       associations: [],
-      roles: ['Administrator', 'Designer']
+      roles: ['Administrator', 'Member'],
+      planning_horizons:['Daily', 'Weekly'],
     };
     this.init();
   }
@@ -31,6 +32,12 @@ class CollaboratorsPage extends Component {
     let members = await getBackendAPI().getMembers();
     console.log('members', members);
     let associations = await getBackendAPI().getAssociations();
+    associations = associations.sort((a, b) => {
+      if(a.team.name === b.team.name){
+        return (a.member.first_name + a.member.last_name) > (b.member.first_name + b.member.last_name) ? 1: (-1);
+      }
+      return a.team.name > b.team.name?1:(-1);
+    });
     console.log('associations', associations);
     this.setState({teams: teams, teamMembers: members, associations: associations});
   }
@@ -91,6 +98,12 @@ class CollaboratorsPage extends Component {
       try{
         let association = await getBackendAPI().addAssociation(team_id_text, member_id_text, role_text);
         newAssociations.push(association);
+        newAssociations = newAssociations.sort((a, b) => {
+          if(a.team.name === b.team.name){
+            return (a.member.first_name + a.member.last_name) > (b.member.first_name + b.member.last_name) ? 1: (-1);
+          }
+          return a.team.name > b.team.name?1:(-1);
+        });
         this.setState({addingAssocation: false, associations: newAssociations});
       } catch(e){
 
@@ -98,9 +111,30 @@ class CollaboratorsPage extends Component {
     }
   }
 
+  autoGenerateHandle = (id, e) => {
+    let name = e.target.value;
+    let auto_gen_handle = '@' + name.toLowerCase().replace(' ', '');
+    document.getElementById(id).value = auto_gen_handle;
+  }
+
+  autoGenerateMemberHandle = (id, e) => {
+    const { teamMembers } = this.state;
+    let name = e.target.value;
+    let auto_gen_handle = '@' + name.toLowerCase().replace(' ', '');
+    let same_count = 0;
+    teamMembers.forEach(member => {
+      if(member.first_name === name){
+        same_count++;
+      }
+    });
+    if(same_count){
+      auto_gen_handle = `${auto_gen_handle}${same_count}`;
+    }
+    document.getElementById(id).value = auto_gen_handle;
+  }
 
   render() {
-    const { addingTeam, teams, addingMember, teamMembers, addingAssocation, associations, roles } = this.state;
+    const { addingTeam, teams, addingMember, teamMembers, addingAssocation, associations, roles, planning_horizons } = this.state;
     return (
       <React.Fragment>
         <div className="container-fluid">
@@ -114,12 +148,6 @@ class CollaboratorsPage extends Component {
                   </li>
                   <li className="breadcrumb-item active">Collaborators</li>
                 </ol>
-              </div>
-            </Col>
-
-            <Col sm={6}>
-              <div className="float-right d-none d-md-block">
-                <SettingMenu />
               </div>
             </Col>
           </Row>
@@ -182,6 +210,7 @@ class CollaboratorsPage extends Component {
                             type="text"
                             id="team_name"
                             name="team_name"
+                            onChange={e => this.autoGenerateHandle('team_handle', e)}
                           />
                         </Col>
                         <Col lg="3" className="form-group">
@@ -203,13 +232,12 @@ class CollaboratorsPage extends Component {
                             />
                         </Col>
                         <Col lg="3" className="form-group">
-                          <Label for="handle">Planngin Horizon</Label>
-                          <Input 
-                            ref={(r) => this.team_planning=r}
-                            type="text" 
-                            id="team_planning" 
-                            name="team_planning"
-                            />
+                          <Label for="handle">Planning Horizon</Label>
+                          <select id="team_planning" name="team_planning" className="form-control">
+                            { planning_horizons.map(item => (
+                              <option key={item} value={item}>{item}</option>
+                            ))}
+                          </select>
                         </Col>
                       </Row>
                       <div className="float-right d-flex">
@@ -217,10 +245,10 @@ class CollaboratorsPage extends Component {
                             onClick={this.addTeam}
                             color="primary"
                             className="mx-2"
-                            style={{ width: "100%" }}
+                            style={{ width: "100%", whiteSpace: "nowrap" }}
                           >
                             {" "}
-                            AddTeam{" "}
+                            Add Team{" "}
                           </Button>
                           <Button
                             onClick={()=>this.setState({addingTeam: false})}
@@ -295,10 +323,11 @@ class CollaboratorsPage extends Component {
                               type="text"
                               id="member_first_name"
                               name="member_first_name"
+                              onChange={e => this.autoGenerateMemberHandle('member_handle', e)}
                             />
                           </Col>
                           <Col lg="2" className="form-group">
-                            <Label for="name">First Name</Label>
+                            <Label for="name">Last Name</Label>
                             <Input
                               ref={(r) => this.member_last_name=r}
                               type="text"
@@ -339,10 +368,10 @@ class CollaboratorsPage extends Component {
                             onClick={this.addTeamMember}
                             color="primary"
                             className="mx-2"
-                            style={{ width: "100%" }}
+                            style={{ width: "100%", whiteSpace: "nowrap" }}
                           >
                             {" "}
-                            AddMember{" "}
+                            Add Member{" "}
                           </Button>
                           <Button
                             onClick={()=>this.setState({addingMember: false})}
@@ -368,13 +397,12 @@ class CollaboratorsPage extends Component {
             <Col sm={6}>
               <div className="card">
                 <div className="card-body">
-                  <h4 className="card-title">Team Memeber Association Tags</h4>
+                  <h4 className="card-title">Team Memeber Association</h4>
 
                   <div className="table-responsive">
                     <table className="table table-striped mb-0">
                       <thead>
                         <tr>
-                          <th>#</th>
                           <th>Team</th>
                           <th>Member</th>
                           <th>Role</th>
@@ -384,7 +412,6 @@ class CollaboratorsPage extends Component {
                         {
                           associations.map((item, index) => (
                             <tr key={index}>
-                              <th scope="row">{index + 1}</th>
                               <td>{item.team.name}</td>
                               <td>{item.member.first_name + " " + item.member.last_name}</td>
                               <td>{item.role}</td>
@@ -437,10 +464,10 @@ class CollaboratorsPage extends Component {
                             onClick={this.addAssociation}
                             color="primary"
                             className="mx-2"
-                            style={{ width: "100%" }}
+                            style={{ width: "100%", whiteSpace: "nowrap" }}
                           >
                             {" "}
-                            AddMember{" "}
+                            Add Member{" "}
                           </Button>
                           <Button
                             onClick={()=>this.setState({addingAssocation: false})}

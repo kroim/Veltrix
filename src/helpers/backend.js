@@ -16,6 +16,7 @@ class BackendAPI {
         }`, 
         (res) => {
           if (res.me) {
+            localStorage.setItem("token", res.me.token);
             localStorage.setItem("authUser", JSON.stringify(res.me));
           } else {
             localStorage.removeItem("authUser");

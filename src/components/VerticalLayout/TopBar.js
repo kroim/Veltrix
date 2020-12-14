@@ -121,16 +121,7 @@ class TopBar extends Component {
               </div>
 
               <ProfileMenu />
-
-              <div className="dropdown d-inline-block">
-                <button
-                  type="button"
-                  onClick={this.toggleRightbar}
-                  className="btn header-item noti-icon right-bar-toggle waves-effect"
-                >
-                  <i className="mdi mdi-settings-outline"></i>
-                </button>
-              </div>
+              
             </div>
           </div>
         </header>

@@ -47,6 +47,9 @@ class ProjectAttributesPage extends Component {
     let package_handle_text = document.getElementById('package_handle').value.trim();
 
     if(package_name_text.length && package_handle_text.length){
+      if(workPackages.find(workPackage => workPackage.tag_name === package_name_text)){
+        return;
+      }
       try{
         let attribute = await getBackendAPI().addProjectAttribute('Work Package', package_name_text, package_handle_text);
         if(attribute){
@@ -66,6 +69,9 @@ class ProjectAttributesPage extends Component {
     let location_handle_text = document.getElementById('location_handle').value;
 
     if(location_name_text.trim().length && location_handle_text.trim().length){
+      if(locationTags.find(location_tag => location_tag.tag_name === location_name_text)){
+        return;
+      }
       try{
         let attribute = await getBackendAPI().addProjectAttribute('Location', location_name_text, location_handle_text);
         if(attribute){
@@ -97,6 +103,12 @@ class ProjectAttributesPage extends Component {
     }
   }
 
+  autoGenerateHandle = (id, e) => {
+    let name = e.target.value;
+    let auto_gen_handle = '@' + name.toLowerCase().replace(' ', '');
+    document.getElementById(id).value = auto_gen_handle;
+  }
+
   render() {
     const { addingPackageTag, workPackages, addingLocationTag, locationTags, addingDisciplineTag, disciplineTags } = this.state;
 
@@ -115,12 +127,6 @@ class ProjectAttributesPage extends Component {
                 </ol>
               </div>
             </Col>
-
-            <Col sm={6}>
-              <div className="float-right d-none d-md-block">
-                <SettingMenu />
-              </div>
-            </Col>
           </Row>
 
           <Row>
@@ -136,7 +142,7 @@ class ProjectAttributesPage extends Component {
                           <thead>
                             <tr>
                               <th>#</th>
-                              <th>Work Package Name</th>
+                              <th>Work Package Tag</th>
                               <th>Handle</th>
                             </tr>
                           </thead>
@@ -168,12 +174,13 @@ class ProjectAttributesPage extends Component {
                         <div className="mt-4">
                           <Row  className="align-items-end">
                             <Col lg="6" className="form-group">
-                              <Label for="name">Work Package Name</Label>
+                              <Label for="name">Work Package Tag</Label>
                               <Input
                                 ref={(r) => this.package_name=r}
                                 type="text"
                                 id="package_name"
                                 name="package_name"
+                                onChange={e => this.autoGenerateHandle('package_handle', e)}
                               />
                             </Col>
 
@@ -192,10 +199,10 @@ class ProjectAttributesPage extends Component {
                               onClick={this.addPackageTag}
                               color="primary"
                               className="mx-2"
-                              style={{ width: "100%" }}
+                              style={{ width: "100%", whiteSpace: "nowrap" }}
                             >
                               {" "}
-                              AddTag{" "}
+                              Add Tag{" "}
                             </Button>
                             <Button
                               onClick={()=>this.setState({addingPackageTag: false})}
@@ -264,6 +271,7 @@ class ProjectAttributesPage extends Component {
                                 type="text"
                                 id="discipline_name"
                                 name="discipline_name"
+                                onChange={e => this.autoGenerateHandle('discipline_handle', e)}
                               />
                             </Col>
 
@@ -282,10 +290,10 @@ class ProjectAttributesPage extends Component {
                                 onClick={this.addDisciplineTag}
                                 color="primary"
                                 className="mx-2"
-                                style={{ width: "100%" }}
+                                style={{ width: "100%", whiteSpace: "nowrap" }}
                               >
                                 {" "}
-                                AddTag{" "}
+                                Add Tag{" "}
                               </Button>
                               <Button
                                 onClick={()=>this.setState({addingDisciplineTag: false})}
@@ -356,6 +364,7 @@ class ProjectAttributesPage extends Component {
                             type="text"
                             id="location_name"
                             name="location_name"
+                            onChange={e => this.autoGenerateHandle('location_handle', e)}
                           />
                         </Col>
 
@@ -374,10 +383,10 @@ class ProjectAttributesPage extends Component {
                           onClick={this.addLocationTag}
                           color="primary"
                           className="mx-2"
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", whiteSpace: "nowrap" }}
                         >
                           {" "}
-                          AddTag{" "}
+                          Add Tag{" "}
                         </Button>
                         <Button
                           onClick={()=>this.setState({addingLocationTag: false})}

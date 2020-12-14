@@ -4,9 +4,6 @@ import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap
 import { withRouter, Link } from 'react-router-dom';
 import SweetAlert from "react-bootstrap-sweetalert";
 
-// users
-import user4 from '../assets/images/users/user-4.jpg';
-
 class ProfileMenu extends Component {
 
     constructor(props) {
@@ -38,13 +35,10 @@ class ProfileMenu extends Component {
             <React.Fragment>
                 <Dropdown isOpen={this.state.menu} toggle={this.toggle} className="d-inline-block" >
                     <DropdownToggle className="btn header-item waves-effect" id="page-header-user-dropdown" tag="button">
-                        <img className="rounded-circle header-profile-user" src={user4} alt="Header Avatar" />
+                    <i className="mdi mdi-account-circle font-size-36 align-middle mr-1"></i>
                     </DropdownToggle>
                     <DropdownMenu right>
                         <DropdownItem tag="a" href="#"><i className="mdi mdi-account-circle font-size-17 align-middle mr-1"></i>Profile</DropdownItem>
-                        <DropdownItem tag="a" href="#"><i className="mdi mdi-wallet font-size-17 align-middle mr-1"></i>My Wallet</DropdownItem>
-                        <DropdownItem tag="a" href="#"><span className="badge badge-success float-right">11</span><i className="mdi mdi-settings font-size-17 align-middle mr-1"></i>Settings</DropdownItem>
-                        <DropdownItem tag="a" href="#"><i className="mdi mdi-lock-open-outline font-size-17 align-middle mr-1"></i>Lock screen</DropdownItem>
                         <div className="dropdown-divider"></div>
                         <div
                             onClick={(e) => this.setState({openLogoutDlg: true})}

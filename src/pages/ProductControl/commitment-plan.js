@@ -29,12 +29,6 @@ class CommitmentPlanPage extends Component {
                 </ol>
               </div>
             </Col>
-
-            <Col sm={6}>
-              <div className="float-right d-none d-md-block">
-                <SettingMenu />
-              </div>
-            </Col>
           </Row>
 
           <Row>
