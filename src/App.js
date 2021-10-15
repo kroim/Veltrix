@@ -3,7 +3,7 @@ import { Switch, BrowserRouter as Router } from "react-router-dom";
 import { connect } from "react-redux";
 
 // Import Routes
-import { authProtectedRoutes, publicRoutes } from "./routes/";
+import {adminProtectedRoutes, authProtectedRoutes, publicRoutes} from "./routes/";
 import AppRoute from "./routes/route";
 
 // layouts
@@ -13,11 +13,6 @@ import NonAuthLayout from "./components/NonAuthLayout";
 
 // Import scss
 import "./assets/scss/theme.scss";
-
-// Import Configuration file
-import { initBackendAPI } from "./helpers/backend";
-
-initBackendAPI();
 
 class App extends Component {
   constructor(props) {
@@ -45,6 +40,9 @@ class App extends Component {
 
   render() {
     const Layout = this.getLayout();
+    if(!this.props.app.init){
+      return null;
+    }
 
     return (
       <React.Fragment>
@@ -60,6 +58,17 @@ class App extends Component {
               />
             ))}
 
+            {adminProtectedRoutes.map((route, idx) => (
+                <AppRoute
+                    path={route.path}
+                    layout={Layout}
+                    component={route.component}
+                    key={idx}
+                    isAuthProtected={false}
+                    isAdminProtected={true}
+                />
+            ))}
+
             {authProtectedRoutes.map((route, idx) => (
               <AppRoute
                 path={route.path}
@@ -69,6 +78,7 @@ class App extends Component {
                 isAuthProtected={true}
               />
             ))}
+
           </Switch>
         </Router>
       </React.Fragment>
@@ -78,7 +88,8 @@ class App extends Component {
 
 const mapStateToProps = state => {
   return {
-    layout: state.Layout
+    layout: state.Layout,
+    app: state.App,
   };
 };
 

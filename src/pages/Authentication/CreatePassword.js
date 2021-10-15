@@ -6,12 +6,13 @@ import { getBackendAPI } from "../../helpers/backend";
 // import images
 import bg from "../../assets/images/bg.jpg";
 import logoDark from "../../assets/images/logo-dark.png";
+import {toast} from "react-toastify";
 
 class CreatePassword extends Component {
   constructor(props) {
     super(props);
     const { history, location } = props;
-    
+
     let id = location.search.replace("?id=", "");
     if(!id || !id.length){
       history.push('/login');
@@ -30,6 +31,7 @@ class CreatePassword extends Component {
     let member = await getBackendAPI().getMember(id);
     if(!member || member.is_registered){
       history.push('/login');
+      toast.info("This user is already registered. Please login", {hideProgressBar: true});
       return;
     }
     this.setState({member: member});
@@ -41,7 +43,8 @@ class CreatePassword extends Component {
     e.preventDefault();
     let username = document.getElementById('username').value;
     let userpassword = document.getElementById('userpassword').value;
-    if(userpassword.trim().length){
+    let confirmpassword = document.getElementById('confirmpassword').value;
+    if(userpassword.length && userpassword === confirmpassword){
       try{
         await getBackendAPI().registerUserByMail(member.email, username, userpassword, member_id);
         history.push('/login');
@@ -52,6 +55,8 @@ class CreatePassword extends Component {
   }
 
   render() {
+    const {member} = this.state;
+    const username = member?member.handle.slice(1):'';
     return (
       <React.Fragment>
         <div
@@ -83,12 +88,23 @@ class CreatePassword extends Component {
 
                     <form className="mt-4" action="#">
                       <div className="form-group">
+                        <label htmlFor="useremail">Email</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="useremail"
+                            value={member?member.email:''}
+                            disabled={true}
+                        />
+                      </div>
+                      <div className="form-group">
                         <label htmlFor="username">Username</label>
                         <input
                           type="text"
                           className="form-control"
                           id="username"
-                          placeholder="Enter username"
+                          value={username}
+                          disabled={true}
                         />
                       </div>
                       <div className="form-group">
@@ -98,6 +114,16 @@ class CreatePassword extends Component {
                           className="form-control"
                           id="userpassword"
                           placeholder="Enter password"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="confirmpassword">Confirm Password</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            id="confirmpassword"
+                            placeholder="Enter confirm password"
                         />
                       </div>
 

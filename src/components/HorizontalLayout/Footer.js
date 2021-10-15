@@ -7,11 +7,11 @@ const Footer = () => {
         <div className="container-fluid">
           <div className="row">
             <div className="col-12">
-              © {new Date().getFullYear()} Veltrix
+              © {new Date().getFullYear()} P2IC
               <span className="d-none d-sm-inline-block">
                 {" "}
                 - Crafted with <i className="mdi mdi-heart text-danger"></i> by
-                Themesbrand.
+                Blue Ocean HPA.
               </span>
             </div>
           </div>

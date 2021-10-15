@@ -2,7 +2,8 @@ import { LOGIN_USER, LOGIN_SUCCESS, LOGOUT_USER, LOGOUT_USER_SUCCESS, API_ERROR 
 
 const initialState = {
     error: null,
-    loading: false
+    loading: false,
+    user: null
 }
 
 const login = (state = initialState, action) => {
@@ -16,14 +17,20 @@ const login = (state = initialState, action) => {
         case LOGIN_SUCCESS:
             state = {
                 ...state,
+                user: action.payload.user,
                 loading: false
             }
             break;
         case LOGOUT_USER:
-            state = { ...state };
+            state = {
+                ...state
+            };
             break;
         case LOGOUT_USER_SUCCESS:
-            state = { ...state };
+            state = {
+                ...state,
+                user: null,
+            };
             break;
         case API_ERROR:
             state = { ...state, error: action.payload, loading: false };

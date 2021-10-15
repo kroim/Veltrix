@@ -1,14 +1,118 @@
-// 
+//
 // projects.scss
 //
 
 // project list
 
 .project-list-table{
-    border-collapse:separate; 
-    border-spacing:0 12px; 
+    border-collapse:separate;
+    border-spacing:0 12px;
   tr{
     background-color: $card-bg;
   }
-  
+
+}
+
+.page-projects{
+  @media (min-width :768px) {
+    .page-content{
+      padding: 2rem 3rem;
+    }
+  }
+  .page-content{
+    .section-projects{
+      .section-title{
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      .projects-container{
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+    }
+
+    .section-phase{
+      margin-top: 2rem;
+      .plans-container{
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+    }
+
+    .project-container{
+      display: flex;
+      flex-direction: column;
+      width: 320px;
+      border: solid 1px grey;
+      margin: 4px;
+      cursor: pointer;
+
+      &.selected{
+        border: solid 2px var(--blue);
+        .project-header{
+          background: var(--blue);
+        }
+      }
+
+      .project-header{
+        background: grey;
+        color: white;
+        padding: 4px 12px;
+        font-size: 20px;
+      }
+      .project-content{
+        padding: 8px;
+        background-color: white;
+        height: 100%;
+        .project-lock{
+          font-size: 160px;
+        }
+        .form-label{
+          width: 80px;
+          text-align: right;
+          margin-right: 4px;
+        }
+        .description{
+          height: 80px;
+        }
+        .btn-container{
+          text-align: right;
+        }
+      }
+    }
+
+    .plan-container{
+      display: flex;
+      flex-direction: column;
+      width: 320px;
+      border: solid 1px grey;
+      margin: 4px;
+
+      .plan-header{
+        background: grey;
+        color: white;
+        padding: 4px 12px;
+        font-size: 20px;
+      }
+      .plan-content{
+        padding: 8px;
+        background-color: white;
+        height: 100%;
+        .plan-lock{
+          font-size: 160px;
+        }
+        .description{
+          height: 80px;
+        }
+        .btn-container{
+          text-align: right;
+        }
+      }
+    }
+  }
 }

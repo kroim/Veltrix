@@ -9,6 +9,7 @@ import bg from "../../assets/images/bg.jpg";
 import logoDark from "../../assets/images/logo-dark.png";
 import { loginUser as loginUserAction } from "../../store/actions";
 import PropTypes from 'prop-types';
+import {toast} from "react-toastify";
 
 
 class Login extends Component {
@@ -22,11 +23,18 @@ class Login extends Component {
     this.state = {};
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const {error} = this.props;
+    if(prevProps.error !== error && error){
+      toast.error("login failed!", {hideProgressBar: true});
+    }
+  }
+
   onLogin = (e) => {
     const { loginUser, history } = this.props;
-    let username = document.getElementById('username').value;
+    let username = document.getElementById('username').value.trim();
     let userpassword = document.getElementById('userpassword').value;
-    if(username.trim().length && userpassword.trim().length){
+    if(username.length && userpassword.length){
       loginUser({name: username, password: userpassword}, history);
     }
     e.preventDefault();
@@ -60,17 +68,17 @@ class Login extends Component {
                       Welcome Back !
                     </h4>
                     <p className="text-muted text-center">
-                      Sign in to continue to Veltrix.
+                      Sign in to continue to P2IC.
                     </p>
 
                     <form className="mt-4" action="#">
                       <div className="form-group">
-                        <label htmlFor="username">Username</label>
+                        <label htmlFor="username">Email/Name</label>
                         <input
                           type="text"
                           className="form-control"
                           id="username"
-                          placeholder="Enter username"
+                          placeholder="Enter email or name"
                         />
                       </div>
 
@@ -133,9 +141,9 @@ class Login extends Component {
                         </Link>{" "}
                       </p>
                       <p>
-                        © {new Date().getFullYear()} Veltrix. Crafted with{" "}
+                        © {new Date().getFullYear()} P2IC. Crafted with{" "}
                         <i className="mdi mdi-heart text-danger"></i> by
-                        Themesbrand
+                        Blue Ocean HPA
                       </p>
                     </div>
                   </div>
@@ -149,8 +157,12 @@ class Login extends Component {
   }
 }
 
+const mapStateToProps = state => {
+  return {error: state.Login.error};
+}
+
 const mapDispatchToProps = dispatch => ({
   loginUser: (param1, param2) => dispatch(loginUserAction(param1, param2)),
 });
 
-export default connect(null, mapDispatchToProps)(withRouter(Login));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Login));

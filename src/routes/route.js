@@ -2,31 +2,38 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 
 //AUTH related methods
-import { initBackendAPI } from "../helpers/backend";
+import {connect} from "react-redux";
 
 const AppRoute = ({
   component: Component,
   layout: Layout,
   isAuthProtected,
+  isAdminProtected,
+  user,
   ...rest
 }) => (
   <Route
     {...rest}
     render={props => {
-      const backendAPI = initBackendAPI();
 
-      if (isAuthProtected && !backendAPI.getAuthenticatedUser()) {
+      if (isAuthProtected && !user) {
         return (
           <Redirect
             to={{ pathname: "/login", state: { from: props.location } }}
           />
         );
-      } else if(!isAuthProtected && backendAPI.getAuthenticatedUser()){
+      } else if(!isAuthProtected && user){
         return (
           <Redirect
             to={{ pathname: "/dashboard", state: { from: props.location } }}
           />
         );
+      } else if(isAdminProtected && user.role !== 'admin'){
+          return (
+              <Redirect
+                  to={{ pathname: "/dashboard", state: { from: props.location } }}
+              />
+          );
       }
 
       return (
@@ -38,4 +45,10 @@ const AppRoute = ({
   />
 );
 
-export default AppRoute;
+const mapStateToProps = state => {
+    return {
+        user: state.Login.user
+    };
+};
+
+export default connect(mapStateToProps, null)(AppRoute);

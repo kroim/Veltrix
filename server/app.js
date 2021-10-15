@@ -4,6 +4,7 @@ const schema = require('./schema/schema');
 const Config = require('./config');
 const verifyTokenMiddleware = require('./middleware/authJwt');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 
@@ -28,8 +29,10 @@ mongoose.connection.once('open', () => {
 
 app.use(verifyTokenMiddleware);
 
+app.use(cors());
+
 app.use('/api', graphqlHTTP({
-    //directing express-graphql to use this schema to map out the graph 
+    //directing express-graphql to use this schema to map out the graph
     schema,
     //directing express-graphql to use graphiql when goto '/graphql' address in the browser
     //which provides an interface to make GraphQl queries
@@ -39,10 +42,10 @@ app.use('/api', graphqlHTTP({
 app.use(express.static(path.join(__dirname, '../build')));
 
 app.get('/*', (req, res)=> {
-    var buildFile = require('path').join(__dirname,'../build/index.html'); 
+    var buildFile = require('path').join(__dirname,'../build/index.html');
     res.sendFile(buildFile);
 });
 
 app.listen(4000, () => {
     console.log('Listening on port 4000');
-}); 
+});

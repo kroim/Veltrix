@@ -26,11 +26,13 @@ function* loginUser({ payload: { user, history } }) {
     }
 }
 
-function* logoutUser({ payload: { history } }) {
+function* logoutUser({}) {
     try {
-        const response = yield call(backendAPI.logout);
-        yield put(logoutUserSuccess(response));
-        history.push('/login');
+        //const response = yield call(backendAPI.logout);
+
+        yield put(logoutUserSuccess());
+        localStorage.removeItem('token');
+        localStorage.removeItem('authUser');
     } catch (error) {
         yield put(apiError(error));
     }

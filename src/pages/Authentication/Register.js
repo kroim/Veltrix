@@ -6,36 +6,94 @@ import { getBackendAPI } from "../../helpers/backend";
 // import images
 import bg from "../../assets/images/bg.jpg";
 import logoDark from "../../assets/images/logo-dark.png";
+import {toast} from "react-toastify";
 
 class Register extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    const { location } = props;
+
+    let id = location.search.replace("?id=", "");
+    this.state = {
+      member_id: (!id || !id.length)?null:id,
+      member: null,
+      email: '',
+      username: '',
+    };
+    this.mounted = false;
+
+    this.init(this.state.member_id);
+  }
+
+  componentDidMount() {
+    this.mounted = true;
+  }
+
+  init = async(id) => {
+    if(!id){
+      return;
+    }
+    const { history } = this.props;
+    let member = await getBackendAPI().getMember(id);
+    if(member && member.is_registered){
+      history.push('/login');
+      toast.info("This user is already registered. Please login", {hideProgressBar: true});
+      return;
+    }
+    if(this.mounted){
+      this.setState({member: member, email: member?member.email:'', username:member?member.handle.slice(1):''});
+    } else {
+      this.state.member = member;
+    }
   }
 
   onRegister = async(e) => {
     const { history } = this.props;
+    const { member, member_id } = this.state;
     e.preventDefault();
-    let useremail = document.getElementById('useremail').value;
-    let username = document.getElementById('username').value;
+    let useremail = document.getElementById('useremail').value.trim();
+    let username = document.getElementById('username').value.trim();
     let userpassword = document.getElementById('userpassword').value;
-    if(useremail.trim().length && this.validateEmail(useremail) && username.trim().length && userpassword.trim().length){
-      try{
-        await getBackendAPI().registerUser(useremail, username, userpassword);
-        history.push('/login');
-      } catch(e){
-        console.log('error', e);
+    let confirmpassword = document.getElementById('confirmpassword').value;
+    console.log('user', useremail, username, userpassword, confirmpassword);
+    let role = 'user';
+    if(useremail.length && this.validateEmail(useremail) && username.length && userpassword.length && userpassword === confirmpassword){
+      if(member){
+        if(member.email !== useremail || member.handle !== ('@' + username)){
+          toast.error("This email and name is not registered", {hideProgressBar: true});
+          return;
+        }
+        try{
+          await getBackendAPI().registerUserByMail(member.email, username, userpassword, member_id);
+          toast.info("You set your password successfully", {hideProgressBar: true});
+          history.push('/login');
+        } catch(e){
+          toast.error("Setting your password was failed", {hideProgressBar: true});
+          console.log('error', e);
+        }
+      } else {
+        try{
+          await getBackendAPI().registerUser(useremail, username, userpassword, role);
+          toast.info("You were registered successfully", {hideProgressBar: true});
+          history.push('/login');
+        } catch(e){
+          toast.error("Registering was failed", {hideProgressBar: true});
+          console.log('error', e);
+        }
       }
+    } else {
+      toast.error("Invalid Input.", {hideProgressBar: true});
     }
   }
 
-  
+
   validateEmail = (email) => {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   }
 
   render() {
+    const {member, email, username} = this.state;
     return (
       <React.Fragment>
         <div
@@ -72,6 +130,8 @@ class Register extends Component {
                           type="email"
                           className="form-control"
                           id="useremail"
+                          value={email}
+                          onChange={event => this.setState({email: event.target.value})}
                           placeholder="Enter email"
                         />
                       </div>
@@ -82,6 +142,8 @@ class Register extends Component {
                           type="text"
                           className="form-control"
                           id="username"
+                          value={username}
+                          onChange={event => this.setState({username: event.target.value})}
                           placeholder="Enter username"
                         />
                       </div>
@@ -93,6 +155,16 @@ class Register extends Component {
                           className="form-control"
                           id="userpassword"
                           placeholder="Enter password"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="confirmpassword">Confirm Password</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            id="confirmpassword"
+                            placeholder="Enter confirm password"
                         />
                       </div>
 

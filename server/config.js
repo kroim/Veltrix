@@ -1,5 +1,5 @@
 module.exports = {
-    server_base_url: 'http://localhost:4000',
+    server_base_url: 'http://103.253.146.235:4000',
     mongodb_host: 'localhost',
     mongodb_port: '27017',
     mongodb_database: 'veltrixdb',
@@ -8,6 +8,6 @@ module.exports = {
     secret: "veltrix-secret-key",
     mailer_host: 'smtp.gmail.com',
     mailer_port: 465,
-    mailer_user: 'sarkis19930919@gmail.com',
-    mailer_pass: 'w"gq(Ej6QVfB7.)$u'
+    mailer_user: 'no.reply.p2ic@gmail.com',
+    mailer_pass: 'Project2021P2IC'
 }
