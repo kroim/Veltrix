@@ -11,6 +11,7 @@ const Project = require('./project');
 const Plan = require('./plan');
 const SysInfo = require('./sysInfo');
 const Task = require('./task');
+const Link = require('./link');
 
 module.exports = {
     User,
@@ -25,5 +26,6 @@ module.exports = {
     ConstraintsAttribute,
     ConstraintsHistoryAttribute,
     CommentsAttribute,
-    Task
+    Task,
+    Link
 }

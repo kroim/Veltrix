@@ -2,10 +2,12 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const taskSchema = new Schema({
+    id: String,
     type: String,
     text: String,
-    end_date: String,
+    date: String,
     duration: Number,
+    parent: String,
     project_id: String,
     plan_id: String,
     work_package_id: String,
@@ -15,6 +17,7 @@ const taskSchema = new Schema({
     status_code: Number,
     crew_size: Number,
     wbs_code: String,
+    metadata: String,
     progress: Number
 }, { collection: 'tasks' });
 

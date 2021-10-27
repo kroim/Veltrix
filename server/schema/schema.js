@@ -3,11 +3,12 @@ const jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const Config = require('../config');
+var mongoose = require('mongoose');
 
 const {
     User, Team, Member, Association,
     ProjectAttribute, Project, Plan, SysInfo, ReasonCodesAttribute,
-    ConstraintsAttribute, ConstraintsHistoryAttribute, CommentsAttribute, Task
+    ConstraintsAttribute, ConstraintsHistoryAttribute, CommentsAttribute, Task, Link
 } = require('../models/index');
 
 const {
@@ -26,6 +27,13 @@ var transport = {
         pass: Config.mailer_pass
     }
 }
+
+const STATUS_RELEASED = 1;
+const STATUS_RELEASED_AT_RISK = 2;
+const STATUS_CONSTRAINED = 3;
+const STATUS_COMPLETED = 4;
+const STATUS_COMPLETED_NO_PLANNED = 5;
+const STATUS_COMMITMENT_PLAN = 6;
 
 var transporter = nodemailer.createTransport(transport)
 
@@ -240,10 +248,12 @@ const TaskType = new GraphQLObjectType({
     name: 'Task',
     fields: () => ({
         _id: {type: GraphQLString},
+        id: {type: GraphQLString},
         type: {type: GraphQLString},
         text: {type: GraphQLString},
         duration: {type: GraphQLInt},
-        end_date: {type: GraphQLString},
+        date: {type: GraphQLString},
+        parent: {type: GraphQLString},
         project_id: {type: GraphQLString},
         plan_id: {type: GraphQLString},
         work_package_id: {type: GraphQLString},
@@ -253,6 +263,7 @@ const TaskType = new GraphQLObjectType({
         status_code: {type: GraphQLInt},
         crew_size: {type: GraphQLInt},
         wbs_code: {type: GraphQLString},
+        metadata: {type: GraphQLString},
         progress: {type: GraphQLFloat},
         project_info: {
             type: ProjectType,
@@ -290,6 +301,17 @@ const TaskType = new GraphQLObjectType({
                 return ProjectAttribute.findById(parent.discipline_id);
             }
         },
+    })
+})
+
+const LinkType = new GraphQLObjectType({
+    name: 'Link',
+    fields: () => ({
+        _id: {type: GraphQLString},
+        id: {type: GraphQLString},
+        type: {type: GraphQLString},
+        source: {type: GraphQLString},
+        target: {type: GraphQLString},
     })
 })
 
@@ -501,6 +523,12 @@ const RootQuery = new GraphQLObjectType({
             type: new GraphQLList(TaskType),
             async resolve() {
                 return Task.find({});
+            }
+        },
+        links: {
+            type: new GraphQLList(LinkType),
+            async resolve() {
+                return Link.find({});
             }
         }
     }
@@ -1014,10 +1042,12 @@ const Mutation = new GraphQLObjectType({
         add_task: {
             type: TaskType,
             args: {
+                id: {type: GraphQLString},
                 type: {type: GraphQLString},
                 text: {type: GraphQLString},
-                end_date: {type: GraphQLString},
+                date: {type: GraphQLString},
                 duration: {type: GraphQLInt},
+                parent: {type: GraphQLString},
                 project_id: {type: GraphQLString},
                 plan_id: {type: GraphQLString},
                 work_package_id: {type: GraphQLString},
@@ -1027,14 +1057,17 @@ const Mutation = new GraphQLObjectType({
                 status_code: {type: GraphQLInt},
                 crew_size: {type: GraphQLInt},
                 wbs_code: {type: GraphQLString},
+                metadata: {type: GraphQLString},
                 progress: {type: GraphQLFloat}
             },
-            resolve(parent, args) {
+            async resolve(parent, args) {
                 let task = new Task({
+                    id: args.id,
                     type: args.type,
                     text: args.text,
-                    end_date: args.end_date,
+                    date: args.date,
                     duration: args.duration,
+                    parent: args.parent,
                     project_id: args.project_id,
                     plan_id: args.plan_id,
                     work_package_id: args.work_package_id,
@@ -1044,6 +1077,7 @@ const Mutation = new GraphQLObjectType({
                     status_code: args.status_code,
                     crew_size: args.crew_size,
                     wbs_code: args.wbs_code,
+                    metadata: args.metadata,
                     progress: args.progress
                 })
                 return task.save();
@@ -1053,10 +1087,12 @@ const Mutation = new GraphQLObjectType({
             type: TaskType,
             args: {
                 _id: {type: GraphQLString},
+                id: {type: GraphQLString},
                 type: {type: GraphQLString},
                 text: {type: GraphQLString},
-                end_date: {type: GraphQLString},
+                date: {type: GraphQLString},
                 duration: {type: GraphQLInt},
+                parent: {type: GraphQLString},
                 project_id: {type: GraphQLString},
                 plan_id: {type: GraphQLString},
                 work_package_id: {type: GraphQLString},
@@ -1066,14 +1102,17 @@ const Mutation = new GraphQLObjectType({
                 status_code: {type: GraphQLInt},
                 crew_size: {type: GraphQLInt},
                 wbs_code: {type: GraphQLString},
+                metadata: {type: GraphQLString},
                 progress: {type: GraphQLFloat}
             },
             async resolve(parent, args) {
                 let task = await Task.findById(args._id);
+                task.id = args.id,
                 task.type = args.type;
                 task.text = args.text;
-                task.end_date = args.end_date;
+                task.date = args.date;
                 task.duration = args.duration;
+                task.parent = args.parent,
                 task.project_id = args.project_id;
                 task.plan_id = args.plan_id;
                 task.work_package_id = args.work_package_id;
@@ -1083,6 +1122,7 @@ const Mutation = new GraphQLObjectType({
                 task.status_code = args.status_code;
                 task.crew_size = args.crew_size;
                 task.wbs_code = args.wbs_code;
+                task.metadata = args.metadata;
                 task.progress = args.progress;
                 return task.save();
             }
@@ -1093,10 +1133,97 @@ const Mutation = new GraphQLObjectType({
                 _id: {type: GraphQLString}
             },
             async resolve(parent, args) {
-                await Task.findByIdAndDelete(args._id);
+                let task = await Task.findByIdAndDelete(args._id);
                 return {success: true};
             }
         },
+        add_link: {
+            type: LinkType,
+            args: {
+                id: {type: GraphQLString},
+                type: {type: GraphQLString},
+                source: {type: GraphQLString},
+                target: {type: GraphQLString}
+            },
+            resolve(parent, args) {
+                let link = new Link({
+                    id: args.id,
+                    type: args.type,
+                    source: args.source,
+                    target: args.target
+                })
+                return link.save();
+            }
+        },
+        update_link: {
+            type: LinkType,
+            args: {
+                _id: {type: GraphQLString},
+                id: {type: GraphQLString},
+                type: {type: GraphQLString},
+                source: {type: GraphQLString},
+                target: {type: GraphQLString},
+            },
+            async resolve(parent, args) {
+                let link = await Link.findById(args._id);
+                link.id = args.id;
+                link.type = args.type;
+                link.source = args.source;
+                link.target = args.target;
+                return link.save();
+            }
+        },
+        delete_link: {
+            type: SuccessType,
+            args: {
+                _id: {type: GraphQLString}
+            },
+            async resolve(parent, args) {
+                await Link.findByIdAndDelete(args._id);
+                return {success: true};
+            }
+        },
+        update_status_code: {
+            type: new GraphQLList(TaskType),
+            args: {
+                _id: {type: GraphQLString}
+            },
+            async resolve(parent, args) {
+                const taskRecords = await Task.find({});
+                const tasks = taskRecords.map(t => {
+                    const metadata = t.metadata?JSON.parse(t.metadata.replace(/'/g, "\"")):{};
+                    return {...t._doc, metadata: {...metadata}};
+                });
+                tasks.sort((a, b) => a.metadata.index - b.metadata.index);
+
+                let task = tasks.find(t => t._id == args._id);
+                if(task){
+                    let milestone = tasks.find(t => t.id == task.parent);
+                    let childTasks = tasks.filter(t => t.parent == task.parent);
+                    let childs = childTasks.length;
+
+                    if(childs > 2 && childTasks[childs - 3].status_code !== STATUS_CONSTRAINED){
+                        console.log('update status 3', STATUS_CONSTRAINED);
+                        await Task.findByIdAndUpdate(mongoose.Types.ObjectId(childTasks[childs - 3]._id), {status_code: STATUS_CONSTRAINED});
+                    }
+                    if(childs > 1 && childTasks[childs - 2].status_code !== STATUS_RELEASED_AT_RISK){
+                        console.log('update status 2', STATUS_RELEASED_AT_RISK);
+                        await Task.findByIdAndUpdate(mongoose.Types.ObjectId(childTasks[childs - 2]._id), {status_code: STATUS_RELEASED_AT_RISK});
+                    }
+                    if(childs > 0 && childTasks[childs - 1].status_code !== STATUS_RELEASED){
+                        console.log('update status 1', STATUS_RELEASED);
+                        await Task.findByIdAndUpdate(mongoose.Types.ObjectId(childTasks[childs - 1]._id), {status_code: STATUS_RELEASED});
+                    }
+
+                    const milestoneStatus = STATUS_CONSTRAINED - (childs < 3?2 - childs:0);
+                    if(milestone && milestone.status_code !== milestoneStatus){
+                        console.log('update status milestone', milestoneStatus);
+                        await Task.findByIdAndUpdate(mongoose.Types.ObjectId(milestone._id), {status_code: milestoneStatus});
+                    }
+                }
+                return Task.find({});
+            }
+        }
     }
 })
 

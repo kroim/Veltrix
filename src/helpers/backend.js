@@ -1032,16 +1032,18 @@ class BackendAPI {
     }
 
     // Task
-    addTask = ({type, text, end_date, duration, project_id, plan_id, work_package_id, location_id, team_id, status_code, discipline_id, crew_size, wbs_code, progress}) => {
+    addTask = ({id, type, text, date, duration, parent, project_id, plan_id, work_package_id, location_id, team_id, status_code, discipline_id, crew_size, wbs_code, progress, metadata}) => {
         return new Promise((resolve, reject) => {
             postCall(`mutation{
-        add_task(type:"${type}", text:"${text}", end_date: "${end_date}", duration: ${duration}, project_id: "${project_id}", plan_id: "${plan_id}", 
-        work_package_id: "${work_package_id}", location_id: "${location_id}", team_id: "${team_id}", status_code: ${status_code}, discipline_id: ${discipline_id?`"${discipline_id}"`:discipline_id}, crew_size: ${crew_size}, wbs_code: "${wbs_code}", progress: ${progress}){
+        add_task(id: "${id}", type:"${type}", text:"${text}", date: "${date}", duration: ${duration}, parent: "${parent}", project_id: "${project_id}", plan_id: "${plan_id}", 
+        work_package_id: "${work_package_id}", location_id: "${location_id}", team_id: "${team_id}", status_code: ${status_code}, discipline_id: ${discipline_id?`"${discipline_id}"`:discipline_id}, crew_size: ${crew_size}, wbs_code: "${wbs_code}", progress: ${progress}, metadata: "${metadata}"){
             _id,
+            id,
             type,
             text,
-            end_date,
+            date,
             duration,
+            parent,
             project_id,
             plan_id,
             work_package_id,
@@ -1051,6 +1053,7 @@ class BackendAPI {
             status_code,
             crew_size,
             wbs_code,
+            metadata,
             progress,
             team_info{
                 name
@@ -1063,9 +1066,6 @@ class BackendAPI {
             },
             plan_info{
                 name
-            },
-            location_info{
-                tag_name
             },
             discipline_info{
                 tag_name
@@ -1083,16 +1083,18 @@ class BackendAPI {
         });
     }
 
-    updateTask = ({_id, type, text, end_date, duration, project_id, plan_id, work_package_id, location_id, team_id, status_code, discipline_id, crew_size, wbs_code, progress}) => {
+    updateTask = ({_id, id, type, text, date, duration, parent, project_id, plan_id, work_package_id, location_id, team_id, status_code, discipline_id, crew_size, wbs_code, progress, metadata}) => {
         return new Promise((resolve, reject) => {
             postCall(`mutation{
-        update_task(_id: "${_id}", type:"${type}", text:"${text}", end_date: "${end_date}", duration: ${duration}, project_id: "${project_id}", plan_id: "${plan_id}",
-        work_package_id: "${work_package_id}", location_id: "${location_id}", team_id: "${team_id}", status_code: ${status_code}, discipline_id: ${discipline_id?`"${discipline_id}"`:discipline_id}, crew_size: ${crew_size}, wbs_code: "${wbs_code}", progress: ${progress}){
+        update_task(_id: "${_id}", id: "${id}", type:"${type}", text:"${text}", date: "${date}", duration: ${duration}, parent: "${parent}", project_id: "${project_id}", plan_id: "${plan_id}",
+        work_package_id: "${work_package_id}", location_id: "${location_id}", team_id: "${team_id}", status_code: ${status_code}, discipline_id: ${discipline_id?`"${discipline_id}"`:discipline_id}, crew_size: ${crew_size}, wbs_code: "${wbs_code}", progress: ${progress}, metadata: "${metadata}"){
             _id,
+            id,
             type,
             text,
-            end_date,
+            date,
             duration,
+            parent,
             project_id,
             plan_id,
             work_package_id,
@@ -1102,6 +1104,7 @@ class BackendAPI {
             status_code,
             crew_size,
             wbs_code,
+            metadata,
             progress,
             team_info{
                 name
@@ -1114,9 +1117,6 @@ class BackendAPI {
             },
             plan_info{
                 name
-            },
-            location_info{
-                tag_name
             },
             discipline_info{
                 tag_name
@@ -1142,10 +1142,12 @@ class BackendAPI {
             getCall(`{
         tasks{
             _id,
+            id,
             type,
             text,
-            end_date,
+            date,
             duration,
+            parent,
             project_id,
             plan_id,
             work_package_id,
@@ -1155,6 +1157,7 @@ class BackendAPI {
             status_code,
             crew_size,
             wbs_code,
+            metadata,
             progress,
             project_info{
                 name
@@ -1166,9 +1169,6 @@ class BackendAPI {
                 name
             },
             work_package_info{
-                tag_name
-            },
-            location_info{
                 tag_name
             },
             discipline_info{
@@ -1212,6 +1212,145 @@ class BackendAPI {
         });
     }
 
+
+    // Links
+    createLink = ({id, source, target, type}) => {
+        return new Promise((resolve, reject) => {
+            postCall(`mutation{
+        add_link(id: "${id}", type:"${type}", source:"${source}", target: "${target}"){
+            _id,
+            id,
+            type,
+            source,
+            target
+        }
+      }`, (res) => {
+                if (res.add_link._id) {
+                    resolve(res.add_link);
+                } else {
+                    reject("Register Failed");
+                }
+            }, error => {
+                reject(this._handleError(error));
+            });
+        });
+    }
+
+    updateLink = ({_id, id, source, target, type}) => {
+        return new Promise((resolve, reject) => {
+            postCall(`mutation{
+        update_link(_id: "${_id}", id: "${id}", type:"${type}", source:"${source}", target: "${target}"){
+            _id,
+            id,
+            type,
+            source,
+            target
+        }
+      }`, (res) => {
+                if (res.update_link._id) {
+                    resolve(res.update_link);
+                } else {
+                    reject("Register Failed");
+                }
+            }, error => {
+                reject(this._handleError(error));
+            });
+        });
+    }
+
+    getLinks = () => {
+        return new Promise((resolve, reject) => {
+            getCall(`{
+            links{
+              _id,
+                id,
+                type,
+                source,
+                target
+            }
+        }`, (res) => {
+                if (res.links) {
+                    resolve(res.links);
+                }
+            },
+            error => {
+                reject(this._handleError(error));
+            }
+        );
+        });
+    }
+
+    deleteLink = (_id) => {
+        return new Promise((resolve, reject) => {
+            postCall(`mutation{
+        delete_link(_id: "${_id}"){
+            success
+        }
+      }`,
+                (res) => {
+                    if (res.delete_link.success) {
+                        resolve(true);
+                    } else {
+                        reject("Delete Link Failed");
+                    }
+                },
+                error => {
+                    reject(this._handleError(error));
+                }
+            );
+        });
+    }
+
+
+    updateStatusCode = (_id) => {
+        return new Promise((resolve, reject) => {
+            postCall(`mutation{
+        update_status_code(_id: "${_id}"){
+            _id,
+            id,
+            type,
+            text,
+            date,
+            duration,
+            parent,
+            project_id,
+            plan_id,
+            work_package_id,
+            location_id,
+            team_id,
+            discipline_id,
+            status_code,
+            crew_size,
+            wbs_code,
+            metadata,
+            progress,
+            project_info{
+                name
+            },
+            plan_info{
+                name
+            },
+            team_info{
+                name
+            },
+            work_package_info{
+                tag_name
+            },
+            discipline_info{
+                tag_name
+            }
+         }
+        }`, (res) => {
+                    if (res.update_status_code) {
+                        resolve(res.update_status_code);
+                    }
+                },
+                error => {
+                    reject(this._handleError(error));
+                }
+            );
+        });
+    }
     //-------------2021-09-23 Alex-----------------
     /**
      * Handle the error

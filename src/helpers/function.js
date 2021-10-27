@@ -51,3 +51,7 @@ export const date_str_format = function (datetime, format) {
     }
     return format_str;
 };
+
+export const getRandomId = (count) => {
+    return Math.floor(Math.random() * (Math.pow(10, count)));
+}

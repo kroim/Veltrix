@@ -48,3 +48,105 @@
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
+.gantt_grid_scale .gantt_grid_head_cell,
+.gantt_task .gantt_task_scale .gantt_scale_cell {
+    font-weight: bold;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.resource_marker{
+    text-align: center;
+}
+.resource_marker div{
+    width: 28px;
+    height: 28px;
+    line-height: 29px;
+    display: inline-block;
+    border-radius: 15px;
+    color: #FFF;
+    margin: 3px;
+}
+.resource_marker.workday_ok div {
+    background: #51c185;
+}
+
+.resource_marker.workday_over div{
+    background: #ff8686;
+}
+
+.owner-label{
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 12px;
+    display: inline-block;
+    border: 1px solid #cccccc;
+    border-radius: 25px;
+    background: #e6e6e6;
+    color: #6f6f6f;
+    margin: 0 3px;
+    font-weight: bold;
+}
+
+.folder_row {
+    font-weight: bold;
+}
+
+.highlighted_resource,
+.highlighted_resource.odd
+{
+    background-color: rgba(255, 251, 224, 0.6);
+}
+
+.resource-controls .gantt_layout_content{
+    padding: 7px;
+    overflow: hidden;
+}
+.resource-controls label{
+    margin: 0 10px;
+    vertical-align: bottom;
+    display: inline-block;
+    color: #3e3e3e;
+    padding: 2px;
+    transition: box-shadow 0.2s;
+}
+
+.resource-controls label:hover{
+    box-shadow: 0 2px rgba(84, 147, 255, 0.42);
+}
+
+.resource-controls label.active,
+.resource-controls label.active:hover
+{
+    box-shadow: 0 2px #5493ffae;
+    color: #1f1f1f;
+}
+
+.resource-controls input{
+    vertical-align: middle;
+}
+
+.gantt_task_cell.week_end {
+    background-color: #e8e8e87d;
+}
+
+.gantt_task_row.gantt_selected .gantt_task_cell.week_end {
+    background-color: #e8e8e87d !important;
+}
+
+
+.group_row,
+.group_row.odd,
+.gantt_task_row.group_row{
+    background-color: rgba(232, 232, 232, 0.6);
+}
+
+.gantt_task_cell.week_end {
+    background-color: #EFF5FD;
+}
+
+.gantt_task_row.gantt_selected .gantt_task_cell.week_end {
+    background-color: #F8EC9C;
+}

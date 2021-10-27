@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import {connect} from "react-redux";
 import Gantt from "../../components/Gantt";
 import {getBackendAPI} from "../../helpers/backend";
+import {Button, Col, Row} from "reactstrap";
 
 
 class LookAheadPlan extends Component {
